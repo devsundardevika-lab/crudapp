@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CRUD App</title>
+
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    body{
+      margin:0;
+      font-family:Arial;
+      background:#360e0c;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      height:100vh;
+    }
+
+    .container{
+      width:750px;
+      background:#06122f;
+      padding:20px;
+      border-radius:20px;
+      color:white;
+    }
+
+    .title{
+      text-align:center;
+      color:orange;
+      font-size:40px;
+      margin-bottom:20px;
+    }
+
+    .btn{
+      padding:12px;
+      border:none;
+      cursor:pointer;
+      border-radius:8px;
+    }
+
+    .add-btn{
+      width:100%;
+      background:orange;
+      color:white;
+      font-size:22px;
+      margin-bottom:10px;
+    }
+
+    .search{
+      width:100%;
+      padding:12px;
+      border-radius:8px;
+      border:none;
+      margin-bottom:10px;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+    }
+
+    th,td{
+      padding:10px;
+      text-align:center;
+      border-bottom:1px solid gray;
+    }
+
+    .edit{
+      background:#1e90ff;
+      color:white;
+      margin-right:5px;
+    }
+
+    .delete{
+      background:red;
+      color:white;
+    }
+
+    .modal{
+      position:fixed;
+      top:0;
+      left:0;
+      width:100%;
+      height:100%;
+      background:rgba(0,0,0,0.6);
+      display:flex;
+      justify-content:center;
+      align-items:center;
+    }
+
+    .box{
+      background:#0b1b3a;
+      padding:20px;
+      border-radius:10px;
+      width:300px;
+    }
+
+    .input{
+      width:100%;
+      padding:10px;
+      margin-bottom:10px;
+      border-radius:6px;
+      border:none;
+    }
+
+    .save{
+      background:orange;
+      color:white;
+      width:100%;
+      margin-top:5px;
+    }
+
+    .cancel{
+      background:gray;
+      color:white;
+      width:100%;
+      margin-top:5px;
+    }
+  </style>
+</head>
+
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+
+function App(){
+
+  const [customers, setCustomers] = React.useState([]);
+  const [show, setShow] = React.useState(false);
+  const [editIndex, setEditIndex] = React.useState(null);
+
+  const [form, setForm] = React.useState({
+    first:"",
+    last:"",
+    email:"",
+    phone:""
+  });
+
+  // input change
+  const handleChange = (e)=>{
+    setForm({...form, [e.target.name]: e.target.value});
+  };
+
+  // CREATE + UPDATE
+  const saveData = ()=>{
+    if(editIndex === null){
+      setCustomers([...customers, form]);
+    }else{
+      const updated = [...customers];
+      updated[editIndex] = form;
+      setCustomers(updated);
+    }
+
+    setForm({first:"",last:"",email:"",phone:""});
+    setEditIndex(null);
+    setShow(false);
+  };
+
+  // DELETE
+  const deleteData = (index)=>{
+    const filtered = customers.filter((_,i)=>i !== index);
+    setCustomers(filtered);
+  };
+
+  // EDIT
+  const editData = (index)=>{
+    setForm(customers[index]);
+    setEditIndex(index);
+    setShow(true);
+  };
+
+  return(
+    <div className="container">
+
+      <div className="title"> Dev's CRUD App</div>
+
+      <button className="btn add-btn" onClick={()=>setShow(true)}>
+        + Create Customer
+      </button>
+
+      <input className="search" placeholder="Search..." />
+
+      {/* TABLE - READ */}
+      <table>
+        <thead>
+          <tr>
+            <th>First</th>
+            <th>Last</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {customers.map((c,index)=>(
+            <tr key={index}>
+              <td>{c.first}</td>
+              <td>{c.last}</td>
+              <td>{c.email}</td>
+              <td>{c.phone}</td>
+              <td>
+                <button className="btn edit" onClick={()=>editData(index)}>Edit</button>
+                <button className="btn delete" onClick={()=>deleteData(index)}>Delete</button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      {/* MODAL */}
+      {show && (
+        <div className="modal">
+          <div className="box">
+
+            <h3>{editIndex === null ? "Create" : "Update"} Customer</h3>
+
+            <input
+              className="input"
+              name="first"
+              placeholder="First Name"
+              value={form.first}
+              onChange={handleChange}
+            />
+
+            <input
+              className="input"
+              name="last"
+              placeholder="Last Name"
+              value={form.last}
+              onChange={handleChange}
+            />
+
+            <input
+              className="input"
+              name="email"
+              placeholder="Email"
+              value={form.email}
+              onChange={handleChange}
+            />
+
+            <input
+              className="input"
+              name="phone"
+              placeholder="Phone"
+              value={form.phone}
+              onChange={handleChange}
+            />
+
+            <button className="btn save" onClick={saveData}>
+              {editIndex === null ? "Create" : "Update"}
+            </button>
+
+            <button className="btn cancel" onClick={()=>setShow(false)}>
+              Cancel
+            </button>
+
+          </div>
+        </div>
+      )}
+
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+
+</script>
+
+</body>
+</html>
